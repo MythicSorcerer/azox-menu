@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>AzoxMenu</name>
-    <description>A scoreboard sidebar plugin with player stats and news system.</description>
+    <description>A scoreboard sidebar plugin with player stats, news, and music.</description>
 
     <properties>
         <java.version>21</java.version>
@@ -47,7 +47,6 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>${project.artifactId}-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -78,7 +77,28 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <!-- Relocate libraries if needed here -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>create-light-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>bash</executable>
+                            <workingDirectory>${project.build.directory}</workingDirectory>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>mkdir -p light_temp; cd light_temp; unzip -q ../${project.artifactId}-${project.version}.jar; rm -rf assets; jar cf ../${project.artifactId}-${project.version}-light.jar .; cd ..; rm -rf light_temp; mv ${project.artifactId}-${project.version}.jar ${project.artifactId}-${project.version}-full.jar</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>

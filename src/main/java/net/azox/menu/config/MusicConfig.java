@@ -4,13 +4,12 @@ import net.azox.menu.AzoxMenu;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 @Getter
 public class MusicConfig {
@@ -23,6 +22,7 @@ public class MusicConfig {
     private int clipDurationSeconds;
     private int playIntervalSeconds;
     private double randomPlayerChance;
+    private boolean bundleMusic;
 
     private boolean showMusic;
     private List<String> entryOrder;
@@ -41,6 +41,7 @@ public class MusicConfig {
         this.clipDurationSeconds = this.config.getInt("music.clip-duration", 30);
         this.playIntervalSeconds = this.config.getInt("music.play-interval", 60);
         this.randomPlayerChance = this.config.getDouble("music.random-player-chance", 0.3);
+        this.bundleMusic = this.config.getBoolean("music.bundle-music", true);
 
         this.showMusic = this.config.getBoolean("sidebar.entries.show-music", true);
         
@@ -62,11 +63,25 @@ public class MusicConfig {
         return this.playIntervalSeconds * 20L;
     }
 
-    public Path getAssetsFolder() {
-        return this.plugin.getDataFolder().toPath().resolve("assets");
+    public Path getMusicFolder() {
+        return this.plugin.getDataFolder().toPath().resolve("music");
     }
     
     public InputStream getMusicInputStream(final String fileName) {
+        final Path externalFile = this.getMusicFolder().resolve(fileName);
+        
+        if (this.bundleMusic && Files.exists(externalFile)) {
+            try {
+                return Files.newInputStream(externalFile);
+            } catch (final IOException e) {
+                this.plugin.getLogger().warning("Failed to read music file: " + fileName);
+            }
+        }
+        
         return this.plugin.getResource("assets/" + fileName);
+    }
+    
+    public boolean hasExternalMusic(final String fileName) {
+        return Files.exists(this.getMusicFolder().resolve(fileName));
     }
 }

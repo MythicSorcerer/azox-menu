@@ -3,6 +3,9 @@ package net.azox.menu.managers;
 import net.azox.menu.AzoxMenu;
 import net.azox.menu.config.SidebarConfig;
 import net.azox.menu.models.PlayerDataManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -20,6 +23,7 @@ public class SidebarManager {
     private final AzoxMenu plugin;
     private SidebarConfig config;
     private BukkitTask updateTask;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     private final Map<UUID, Scoreboard> playerScoreboards;
     private final Set<UUID> flashingPlayers;
@@ -112,15 +116,15 @@ public class SidebarManager {
                 PlayerDataManager.PlayerStatus.ACTIVE : null;
 
         return switch (key.toLowerCase()) {
-            case "status" -> this.config.isShowStatus() ? "<gray>Status: <white>" : "";
-            case "playtime" -> this.config.isShowPlaytime() ? "<gray>Playtime: <white>" : "";
-            case "kills" -> this.config.isShowKills() ? "<gray>Kills: <white>" : "";
-            case "deaths" -> this.config.isShowDeaths() ? "<gray>Deaths: <white>" : "";
-            case "money" -> this.config.isShowMoney() ? "<gray>Money: <green>$" : "";
-            case "rank" -> this.config.isShowRank() ? "<gray>Rank: <gold>" : "";
-            case "store" -> this.config.isShowStore() ? "<gray>Store: <click:open_url:'https://" + this.config.getStoreUrl() + "'><underline><white>" : "";
-            case "networth" -> this.config.isShowNetworth() ? "<gray>Net Worth: <green>$" : "";
-            case "music" -> this.config.isShowMusic() ? "<gray>Music: <yellow>" : "";
+            case "status" -> this.config.isShowStatus() ? "§7Status: §f" : "";
+            case "playtime" -> this.config.isShowPlaytime() ? "§7Playtime: §f" : "";
+            case "kills" -> this.config.isShowKills() ? "§7Kills: §f" : "";
+            case "deaths" -> this.config.isShowDeaths() ? "§7Deaths: §f" : "";
+            case "money" -> this.config.isShowMoney() ? "§7Money: §a$" : "";
+            case "rank" -> this.config.isShowRank() ? "§7Rank: §6" : "";
+            case "store" -> this.config.isShowStore() ? "§7Store: §n§f" : "";
+            case "networth" -> this.config.isShowNetworth() ? "§7Net Worth: §a$" : "";
+            case "music" -> this.config.isShowMusic() ? "§7Music: §e" : "";
             default -> "";
         };
     }
@@ -133,7 +137,7 @@ public class SidebarManager {
             case "deaths" -> this.config.isShowDeaths() ? this.getDeathsSuffix() : "";
             case "money" -> this.config.isShowMoney() ? "0" : "";
             case "rank" -> this.config.isShowRank() ? "Default" : "";
-            case "store" -> this.config.isShowStore() ? "</underline></white>" : "";
+            case "store" -> this.config.isShowStore() ? "§r" : "";
             case "networth" -> this.config.isShowNetworth() ? "0" : "";
             case "music" -> this.config.isShowMusic() ? this.getMusicSuffix() : "";
             default -> "";
@@ -146,14 +150,14 @@ public class SidebarManager {
             final PlayerDataManager.PlayerData data = PlayerDataManager.getInstance().get(currentPlayerUuid);
             if (data != null) {
                 return switch (data.getStatus()) {
-                    case ACTIVE -> "<green>Active";
-                    case JAIL -> "<red>Jail";
-                    case AFK -> "<yellow>AFK";
-                    case NEWS -> "<gold>News!";
+                    case ACTIVE -> "§aActive";
+                    case JAIL -> "§cJail";
+                    case AFK -> "§eAFK";
+                    case NEWS -> "§6News!";
                 };
             }
         }
-        return "<green>Active";
+        return "§aActive";
     }
 
     private UUID getCurrentPlayerUuid() {
@@ -212,6 +216,15 @@ public class SidebarManager {
         return "None";
     }
 
+    private String miniToLegacy(final String miniMessage) {
+        try {
+            final Component component = this.miniMessage.deserialize(miniMessage);
+            return PlainTextComponentSerializer.plainText().serialize(component);
+        } catch (final Exception e) {
+            return miniMessage;
+        }
+    }
+
     private void startUpdateTask() {
         this.updateTask = Bukkit.getScheduler().runTaskTimer(
                 this.plugin,
@@ -262,15 +275,15 @@ public class SidebarManager {
 
     private String getPrefixForEntryWithPlayer(final String key, final Player player) {
         return switch (key.toLowerCase()) {
-            case "status" -> this.config.isShowStatus() ? "<gray>Status: <white>" : "";
-            case "playtime" -> this.config.isShowPlaytime() ? "<gray>Playtime: <white>" : "";
-            case "kills" -> this.config.isShowKills() ? "<gray>Kills: <white>" : "";
-            case "deaths" -> this.config.isShowDeaths() ? "<gray>Deaths: <white>" : "";
-            case "money" -> this.config.isShowMoney() ? "<gray>Money: <green>$" : "";
-            case "rank" -> this.config.isShowRank() ? "<gray>Rank: <gold>" : "";
-            case "store" -> this.config.isShowStore() ? "<gray>Store: <click:open_url:'https://" + this.config.getStoreUrl() + "'><underline><white>" : "";
-            case "networth" -> this.config.isShowNetworth() ? "<gray>Net Worth: <green>$" : "";
-            case "music" -> this.config.isShowMusic() ? "<gray>Music: <yellow>" : "";
+            case "status" -> this.config.isShowStatus() ? "§7Status: §f" : "";
+            case "playtime" -> this.config.isShowPlaytime() ? "§7Playtime: §f" : "";
+            case "kills" -> this.config.isShowKills() ? "§7Kills: §f" : "";
+            case "deaths" -> this.config.isShowDeaths() ? "§7Deaths: §f" : "";
+            case "money" -> this.config.isShowMoney() ? "§7Money: §a$" : "";
+            case "rank" -> this.config.isShowRank() ? "§7Rank: §6" : "";
+            case "store" -> this.config.isShowStore() ? "§7Store: §n§f" : "";
+            case "networth" -> this.config.isShowNetworth() ? "§7Net Worth: §a$" : "";
+            case "music" -> this.config.isShowMusic() ? "§7Music: §e" : "";
             default -> "";
         };
     }
@@ -285,7 +298,7 @@ public class SidebarManager {
             case "deaths" -> this.config.isShowDeaths() ? (data != null ? String.valueOf(data.getDeaths()) : "0") : "";
             case "money" -> this.config.isShowMoney() ? "0" : "";
             case "rank" -> this.config.isShowRank() ? "Default" : "";
-            case "store" -> this.config.isShowStore() ? "</underline></white>" : "";
+            case "store" -> this.config.isShowStore() ? "§r" : "";
             case "networth" -> this.config.isShowNetworth() ? "0" : "";
             case "music" -> this.config.isShowMusic() ? this.getMusicSuffixForPlayer(player) : "";
             default -> "";
@@ -295,13 +308,13 @@ public class SidebarManager {
     private String getStatusSuffixForPlayer(final PlayerDataManager.PlayerData data) {
         if (data != null) {
             return switch (data.getStatus()) {
-                case ACTIVE -> "<green>Active";
-                case JAIL -> "<red>Jail";
-                case AFK -> "<yellow>AFK";
-                case NEWS -> "<gold>News!";
+                case ACTIVE -> "§aActive";
+                case JAIL -> "§cJail";
+                case AFK -> "§eAFK";
+                case NEWS -> "§6News!";
             };
         }
-        return "<green>Active";
+        return "§aActive";
     }
 
     public void setTempNewsFlashing(final UUID uuid, final boolean flashing) {

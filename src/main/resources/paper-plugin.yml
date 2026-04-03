@@ -3,22 +3,7 @@ version: '${project.version}'
 main: net.azox.menu.AzoxMenu
 api-version: '1.21'
 author: ximotu
-description: A scoreboard sidebar plugin with player stats and news system.
-load: STARTUP
-
-commands:
-  azoxreload:
-    description: Reload the plugin configuration.
-    permission: azox.admin
-    usage: /<command>
-  news:
-    description: Manage news broadcasts and sidebar messages.
-    permission: azox.news
-    usage: /<command>
-  music:
-    description: Control custom music playback.
-    permission: azox.menu
-    usage: /<command>
+description: A scoreboard sidebar plugin with player stats, news, and music.
 
 permissions:
   azox.admin:

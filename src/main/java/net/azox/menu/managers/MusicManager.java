@@ -2,17 +2,16 @@ package net.azox.menu.managers;
 
 import net.azox.menu.AzoxMenu;
 import net.azox.menu.config.MusicConfig;
+import net.azox.menu.utils.MusicExtractor;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,6 +45,7 @@ public class MusicManager {
         this.config = new MusicConfig(plugin);
         instance = this;
 
+        MusicExtractor.extractBundledMusic(plugin);
         this.loadMusicFiles();
         this.startPlayTask();
         this.startRatingPromptCleanupTask();
@@ -53,12 +53,27 @@ public class MusicManager {
 
     public void reloadConfig() {
         this.config.load();
+        this.loadMusicFiles();
     }
 
     private void loadMusicFiles() {
         this.musicFiles.clear();
 
-        final String[] musicFileNames = {
+        final Path musicFolder = this.config.getMusicFolder();
+        
+        if (Files.exists(musicFolder)) {
+            try (final DirectoryStream<Path> stream = Files.newDirectoryStream(musicFolder, "*.mp3")) {
+                for (final Path path : stream) {
+                    final String fileName = path.getFileName().toString();
+                    final String trackName = fileName.replace(".mp3", "").replace("_", " ");
+                    this.musicFiles.add(trackName);
+                }
+            } catch (final IOException e) {
+                this.plugin.getLogger().warning("Failed to load music from folder: " + e.getMessage());
+            }
+        }
+        
+        final String[] bundledMusic = {
             "Glass_at_the_Edge_of_Morning.mp3",
             "Pale_Horizon_Line.mp3",
             "The_Glass_Conservatory.mp3",
@@ -66,15 +81,17 @@ public class MusicManager {
             "The_Valley_Floor.mp3"
         };
 
-        for (final String fileName : musicFileNames) {
-            final InputStream stream = this.config.getMusicInputStream(fileName);
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (final IOException ignored) {
+        for (final String fileName : bundledMusic) {
+            if (this.musicFiles.stream().noneMatch(t -> t.equals(fileName.replace(".mp3", "").replace("_", " ")))) {
+                final InputStream stream = this.config.getMusicInputStream(fileName);
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (final IOException ignored) {
+                    }
+                    final String trackName = fileName.replace(".mp3", "").replace("_", " ");
+                    this.musicFiles.add(trackName);
                 }
-                final String trackName = fileName.replace(".mp3", "").replace("_", " ");
-                this.musicFiles.add(trackName);
             }
         }
 

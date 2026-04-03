@@ -9,7 +9,7 @@ settings:
 
 sidebar:
   title:
-    text: "<#FF6B6B>Play</#FFAA6B>Server</#6BFF6B>.com"
+    text: "§cPlay§6Server§a.com"
   
   entries:
     order:
@@ -39,6 +39,7 @@ music:
   clip-duration: 30
   play-interval: 60
   random-player-chance: 0.3
+  bundle-music: true
 
 news:
   main: ""

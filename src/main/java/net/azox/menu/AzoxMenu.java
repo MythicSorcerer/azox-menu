@@ -10,10 +10,16 @@ import net.azox.menu.listeners.PlayerQuitListener;
 import net.azox.menu.managers.MusicManager;
 import net.azox.menu.managers.SidebarManager;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Field;
 import java.util.logging.Level;
 
 @Getter
@@ -30,16 +36,18 @@ public final class AzoxMenu extends JavaPlugin {
         instance = this;
 
         this.saveDefaultConfig();
-        
+
         this.disableDefaultMusic();
 
         this.sidebarManager = new SidebarManager(this);
         this.musicManager = new MusicManager(this);
 
-        this.registerCommands();
         this.registerListeners();
 
-        this.getLogger().log(Level.INFO, "AzoxMenu has been enabled successfully.");
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            this.registerCommands();
+            this.getLogger().log(Level.INFO, "AzoxMenu has been enabled successfully.");
+        }, 1L);
     }
 
     @Override
@@ -47,7 +55,7 @@ public final class AzoxMenu extends JavaPlugin {
         if (this.sidebarManager != null) {
             this.sidebarManager.cleanup();
         }
-        
+
         if (this.musicManager != null) {
             this.musicManager.cleanup();
         }
@@ -68,26 +76,43 @@ public final class AzoxMenu extends JavaPlugin {
     }
 
     private void disableDefaultMusic() {
-        Bukkit.getWorlds().forEach(world -> {
-            world.setGameRule(org.bukkit.GameRule.DO_INSOMNIA, true);
-        });
+        this.getServer().getScheduler().runTaskLater(this, () -> {
+            for (final Player player : Bukkit.getOnlinePlayers()) {
+                player.stopSound(org.bukkit.Sound.MUSIC_CREATIVE, org.bukkit.SoundCategory.MUSIC);
+                player.stopSound(org.bukkit.Sound.MUSIC_GAME, org.bukkit.SoundCategory.MUSIC);
+                player.stopSound(org.bukkit.Sound.MUSIC_MENU, org.bukkit.SoundCategory.MUSIC);
+            }
+        }, 5L);
+        
         this.getLogger().log(Level.INFO, "Default Minecraft music disabled.");
     }
 
     private void registerCommands() {
-        final PluginCommand reloadCommand = this.getCommand("azoxreload");
-        if (reloadCommand != null) {
-            reloadCommand.setExecutor(new ReloadCommand());
-        }
+        this.registerCommand("azoxreload", new ReloadCommand(), "azox.admin");
+        this.registerCommand("music", new MusicCommand(this), "azox.menu");
+        this.registerCommand("news", new NewsCommand(), "azox.news");
+    }
 
-        final PluginCommand newsCommand = this.getCommand("news");
-        if (newsCommand != null) {
-            newsCommand.setExecutor(new NewsCommand());
-        }
-        
-        final PluginCommand musicCommand = this.getCommand("music");
-        if (musicCommand != null) {
-            musicCommand.setExecutor(new MusicCommand(this));
+    private void registerCommand(final String name, final CommandExecutor executor, final String permission) {
+        try {
+            final Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            final CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
+
+            final Command command = new Command(name) {
+                @Override
+                public boolean execute(final CommandSender sender, final String label, final String[] args) {
+                    if (!sender.hasPermission(permission)) {
+                        sender.sendMessage(Component.text("You don't have permission to use this command.").color(net.kyori.adventure.text.format.NamedTextColor.RED));
+                        return true;
+                    }
+                    return executor.onCommand(sender, this, label, args);
+                }
+            };
+
+            commandMap.register(this.getName(), command);
+        } catch (final Exception exception) {
+            this.getLogger().warning("Failed to register command " + name + ": " + exception.getMessage());
         }
     }
 

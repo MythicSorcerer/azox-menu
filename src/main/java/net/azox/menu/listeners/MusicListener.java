@@ -2,7 +2,7 @@ package net.azox.menu.listeners;
 
 import net.azox.menu.AzoxMenu;
 import net.azox.menu.managers.MusicManager;
-import net.azox.menu.managers.SidebarManager;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,6 +25,10 @@ public class MusicListener implements Listener {
         if (musicManager != null) {
             musicManager.onPlayerJoin(player);
         }
+        
+        player.stopSound(org.bukkit.Sound.MUSIC_CREATIVE, org.bukkit.SoundCategory.MUSIC);
+        player.stopSound(org.bukkit.Sound.MUSIC_GAME, org.bukkit.SoundCategory.MUSIC);
+        player.stopSound(org.bukkit.Sound.MUSIC_MENU, org.bukkit.SoundCategory.MUSIC);
     }
 
     @EventHandler
