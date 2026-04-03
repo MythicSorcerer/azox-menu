@@ -22,7 +22,6 @@ public class MusicConfig {
     private int clipDurationSeconds;
     private int playIntervalSeconds;
     private double randomPlayerChance;
-    private boolean bundleMusic;
 
     private boolean showMusic;
     private List<String> entryOrder;
@@ -41,7 +40,6 @@ public class MusicConfig {
         this.clipDurationSeconds = this.config.getInt("music.clip-duration", 30);
         this.playIntervalSeconds = this.config.getInt("music.play-interval", 60);
         this.randomPlayerChance = this.config.getDouble("music.random-player-chance", 0.3);
-        this.bundleMusic = this.config.getBoolean("music.bundle-music", true);
 
         this.showMusic = this.config.getBoolean("sidebar.entries.show-music", true);
         
@@ -70,7 +68,7 @@ public class MusicConfig {
     public InputStream getMusicInputStream(final String fileName) {
         final Path externalFile = this.getMusicFolder().resolve(fileName);
         
-        if (this.bundleMusic && Files.exists(externalFile)) {
+        if (Files.exists(externalFile)) {
             try {
                 return Files.newInputStream(externalFile);
             } catch (final IOException e) {
