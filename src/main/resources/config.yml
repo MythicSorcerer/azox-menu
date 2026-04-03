@@ -1,0 +1,50 @@
+# AzoxMenu Configuration
+# Author: ximotu
+# Version: 1.0.0
+
+settings:
+  enabled: true
+  update-interval: 20
+  afk-timeout: 300
+
+sidebar:
+  title:
+    text: "<#FF6B6B>Play</#FFAA6B>Server</#6BFF6B>.com"
+  
+  entries:
+    order:
+      - music
+      - status
+      - playtime
+      - kills
+      - deaths
+      - store
+      - networth
+    
+    show-money: false
+    show-playtime: true
+    show-kills: false
+    show-deaths: false
+    show-rank: false
+    show-status: true
+    show-store: true
+    show-networth: false
+    show-music: true
+  
+  store-url: "store.example.com"
+
+music:
+  enabled: true
+  min-players: 3
+  clip-duration: 30
+  play-interval: 60
+  random-player-chance: 0.3
+
+news:
+  main: ""
+  temp-flash-duration: 10
+  queued-flash-duration: 5
+  queued: []
+
+messages:
+  prefix: "<gray>[<gold>AzoxMenu<gray>] <white>"
