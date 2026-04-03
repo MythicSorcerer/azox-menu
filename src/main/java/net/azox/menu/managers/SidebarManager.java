@@ -44,6 +44,15 @@ public class SidebarManager {
         return this.config;
     }
 
+    private String miniToLegacy(final String mini) {
+        try {
+            final Component component = this.miniMessage.deserialize(mini);
+            return net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().serialize(component);
+        } catch (final Exception e) {
+            return mini;
+        }
+    }
+
     public void showSidebar(final Player player) {
         if (!this.config.isEnabled()) {
             return;
@@ -52,7 +61,7 @@ public class SidebarManager {
         final Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
         final String objectiveName = "azoxmenu";
 
-        final String title = this.config.getServerName();
+        final String title = this.miniToLegacy(this.config.getServerName());
 
         final Objective objective = scoreboard.registerNewObjective(
                 objectiveName,
@@ -216,15 +225,6 @@ public class SidebarManager {
         return "None";
     }
 
-    private String miniToLegacy(final String miniMessage) {
-        try {
-            final Component component = this.miniMessage.deserialize(miniMessage);
-            return PlainTextComponentSerializer.plainText().serialize(component);
-        } catch (final Exception e) {
-            return miniMessage;
-        }
-    }
-
     private void startUpdateTask() {
         this.updateTask = Bukkit.getScheduler().runTaskTimer(
                 this.plugin,
@@ -252,7 +252,7 @@ public class SidebarManager {
 
         final Objective objective = scoreboard.getObjective("azoxmenu");
         if (objective != null) {
-            final String title = this.config.getServerName();
+            final String title = this.miniToLegacy(this.config.getServerName());
             objective.setDisplayName(title);
         }
 
