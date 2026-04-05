@@ -4,7 +4,6 @@ import net.azox.menu.AzoxMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.plugin.Plugin;
 
 public class ScoreboardListener implements Listener {
@@ -32,10 +31,6 @@ public class ScoreboardListener implements Listener {
                 final Class<?> listenerClass = Class.forName("com.github.retrooper.packetevents.event.PacketListener", true, classLoader);
                 final Object eventManager = api.getClass().getMethod("getEventManager").invoke(api);
                 
-                final java.lang.reflect.Method registerMethod = eventManager.getClass().getMethod(
-                    "registerListener", listenerClass
-                );
-                
                 final Class<?> wrapperClass = Class.forName(
                     "com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerScoreboardObjective", true, classLoader
                 );
@@ -44,6 +39,9 @@ public class ScoreboardListener implements Listener {
                 );
                 final Class<?> eventClass = Class.forName(
                     "com.github.retrooper.packetevents.event.PacketSendEvent", true, classLoader
+                );
+                final Class<?> packetClass = Class.forName(
+                    "com.github.retrooper.packetevents.protocol.packets.Packet", true, classLoader
                 );
                 
                 final java.lang.reflect.InvocationHandler handler = (proxy, method, args) -> {
@@ -59,14 +57,15 @@ public class ScoreboardListener implements Listener {
                             final Object eventPacketType = eventClass.getMethod("getPacketType").invoke(event);
                             
                             if (scoreboardType.equals(eventPacketType)) {
-                                final Object packet = wrapperClass.getConstructor(eventClass).newInstance(event);
+                                final Object rawPacket = eventClass.getMethod("getPacket").invoke(event);
+                                final Object packet = wrapperClass.cast(rawPacket);
                                 
                                 final String name = (String) wrapperClass.getMethod("getObjectiveName").invoke(packet);
                                 
                                 if ("azoxmenu".equals(name)) {
                                     final Object blankFormat = scoreFormatClass.getMethod("blankScore").invoke(null);
                                     wrapperClass.getMethod("setScoreFormat", scoreFormatClass).invoke(packet, blankFormat);
-                                    eventClass.getMethod("markForReencode", boolean.class).invoke(event, true);
+                                    eventClass.getMethod("markForReencode").invoke(event);
                                 }
                             }
                         } catch (final Exception ignored) {
@@ -81,12 +80,22 @@ public class ScoreboardListener implements Listener {
                     handler
                 );
                 
+                final java.lang.reflect.Method registerMethod = eventManager.getClass().getMethod(
+                    "registerListener", listenerClass
+                );
                 registerMethod.invoke(eventManager, listener);
+                
                 this.packetEventsAvailable = true;
                 this.plugin.getLogger().info("PacketEvents found (v" + packetEvents.getDescription().getVersion() + ") - scoreboard numbers will be hidden.");
                 
             } catch (final Exception e) {
-                this.plugin.getLogger().warning("Failed to initialize PacketEvents: " + e.getClass().getSimpleName());
+                this.plugin.getLogger().warning("Failed to initialize PacketEvents: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                for (final StackTraceElement ste : e.getStackTrace()) {
+                    if (ste.getLineNumber() > 0) {
+                        this.plugin.getLogger().warning("  at " + ste.getClassName() + "." + ste.getMethodName() + ":" + ste.getLineNumber());
+                        if (ste.getLineNumber() > 0 && ste.getLineNumber() < 100) break;
+                    }
+                }
             }
         } else {
             this.plugin.getLogger().warning("PacketEvents not found - scoreboard numbers will be visible.");
