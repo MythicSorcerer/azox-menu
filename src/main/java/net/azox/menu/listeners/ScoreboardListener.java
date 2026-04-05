@@ -35,13 +35,10 @@ public class ScoreboardListener implements Listener {
                     "com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerScoreboardObjective", true, classLoader
                 );
                 final Class<?> scoreFormatClass = Class.forName(
-                    "com.github.retrooper.packetevents.protocol.scoreboard.ScoreFormat", true, classLoader
+                    "com.github.retrooper.packetevents.protocol.score.ScoreFormat", true, classLoader
                 );
                 final Class<?> eventClass = Class.forName(
                     "com.github.retrooper.packetevents.event.PacketSendEvent", true, classLoader
-                );
-                final Class<?> packetClass = Class.forName(
-                    "com.github.retrooper.packetevents.protocol.packets.Packet", true, classLoader
                 );
                 
                 final java.lang.reflect.InvocationHandler handler = (proxy, method, args) -> {
@@ -90,12 +87,6 @@ public class ScoreboardListener implements Listener {
                 
             } catch (final Exception e) {
                 this.plugin.getLogger().warning("Failed to initialize PacketEvents: " + e.getClass().getSimpleName() + " - " + e.getMessage());
-                for (final StackTraceElement ste : e.getStackTrace()) {
-                    if (ste.getLineNumber() > 0) {
-                        this.plugin.getLogger().warning("  at " + ste.getClassName() + "." + ste.getMethodName() + ":" + ste.getLineNumber());
-                        if (ste.getLineNumber() > 0 && ste.getLineNumber() < 100) break;
-                    }
-                }
             }
         } else {
             this.plugin.getLogger().warning("PacketEvents not found - scoreboard numbers will be visible.");
