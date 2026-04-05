@@ -7,6 +7,7 @@ import net.azox.menu.listeners.MusicListener;
 import net.azox.menu.listeners.PlayerJoinListener;
 import net.azox.menu.listeners.PlayerMoveListener;
 import net.azox.menu.listeners.PlayerQuitListener;
+import net.azox.menu.listeners.ScoreboardListener;
 import net.azox.menu.managers.MusicManager;
 import net.azox.menu.managers.SidebarManager;
 import lombok.Getter;
@@ -121,5 +122,6 @@ public final class AzoxMenu extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerMoveListener(), this);
         this.getServer().getPluginManager().registerEvents(new MusicListener(this), this);
+        this.getServer().getPluginManager().registerEvents(new ScoreboardListener(this), this);
     }
 }
